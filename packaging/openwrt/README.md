@@ -10,7 +10,7 @@ GitHub 上的 `hideck_*_linux_*` 是 glibc + UPX，OpenWrt（musl）不能跑。
 opkg update
 opkg install curl libqmi kmod-usb-net-qmi-wwan kmod-usb-serial-option
 
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | sh
 ```
 
 脚本在 OpenWrt 上会拉 `openwrt_amd64` / `openwrt_arm64` / `openwrt_armv7`，装到 `/usr/bin/hideck`，配置 `/etc/hideck/config.yaml`，数据 `/var/lib/hideck`，并用 procd 拉起。

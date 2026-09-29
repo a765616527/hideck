@@ -1,6 +1,6 @@
 services:
   hideck:
-    image: yibaiba/hideck:latest
+    image: ghcr.io/a765616527/hideck:latest
     container_name: hideck
     restart: unless-stopped
     init: true

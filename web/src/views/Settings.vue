@@ -552,7 +552,7 @@ onMounted(() => {
               <FieldRow label="配置路径" :value="systemInfo.config" monospace copyable />
             </div>
             <div class="p-3 bg-[var(--ui-surface-muted)] rounded-[var(--ui-radius-lg)]">
-              <FieldRow label="项目主页" value="https://github.com/yibaiba/hideck" monospace copyable />
+              <FieldRow label="项目主页" value="https://github.com/a765616527/hideck" monospace copyable />
             </div>
             <div class="ui-panel-muted px-4 py-4">
               <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

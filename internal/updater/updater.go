@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	dockerHubTagsURL = "https://hub.docker.com/v2/repositories/yibaiba/hideck/tags?page_size=100&ordering=last_updated"
-	maxResponseBytes = 2 << 20
+	forkLatestReleaseURL = "https://api.github.com/repos/a765616527/hideck/releases/latest"
+	maxResponseBytes     = 2 << 20
 )
 
 var (
@@ -37,6 +37,7 @@ type CheckerOptions struct {
 type Checker struct {
 	client         HTTPClient
 	tagsURL        string
+	useReleases    bool
 	currentVersion string
 	isDocker       bool
 }
@@ -66,12 +67,14 @@ type semanticVersion struct {
 
 func NewChecker(client HTTPClient, options CheckerOptions) *Checker {
 	tagsURL := strings.TrimSpace(options.TagsURL)
+	useReleases := tagsURL == ""
 	if tagsURL == "" {
-		tagsURL = dockerHubTagsURL
+		tagsURL = forkLatestReleaseURL
 	}
 	return &Checker{
 		client:         client,
 		tagsURL:        tagsURL,
+		useReleases:    useReleases,
 		currentVersion: strings.TrimSpace(options.CurrentVersion),
 		isDocker:       options.IsDocker,
 	}
@@ -79,12 +82,20 @@ func NewChecker(client HTTPClient, options CheckerOptions) *Checker {
 
 func (c *Checker) CheckUpdate(ctx context.Context) (*UpdateInfo, error) {
 	current, err := parseStableVersion(c.currentVersion)
-	if err != nil {
+	developmentBuild := strings.HasPrefix(c.currentVersion, "dev-")
+	if err != nil && !developmentBuild {
 		return nil, fmt.Errorf("当前构建版本无效 %q: %w", c.currentVersion, err)
 	}
 	latest, err := c.fetchLatestVersion(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if developmentBuild {
+		return &UpdateInfo{
+			CurrentVer: c.currentVersion, LatestVer: latest.tag,
+			ReleaseNote: "当前为 main 开发构建，无法与 Release 比较版本；重新运行本仓库的部署脚本可拉取最新镜像。",
+			IsDocker:    c.isDocker,
+		}, nil
 	}
 
 	hasUpdate := compareVersions(latest, current) > 0
@@ -100,6 +111,9 @@ func (c *Checker) CheckUpdate(ctx context.Context) (*UpdateInfo, error) {
 func (c *Checker) fetchLatestVersion(ctx context.Context) (semanticVersion, error) {
 	if c.client == nil {
 		return semanticVersion{}, errors.New("更新检查 HTTP 客户端未初始化")
+	}
+	if c.useReleases {
+		return c.fetchLatestRelease(ctx)
 	}
 	endpoint, err := url.Parse(c.tagsURL)
 	if err != nil || endpoint.Scheme == "" || endpoint.Host == "" {
@@ -126,6 +140,44 @@ func (c *Checker) fetchLatestVersion(ctx context.Context) (semanticVersion, erro
 		return semanticVersion{}, errors.New("Docker Hub 未返回可用的稳定版本标签")
 	}
 	return *latest, nil
+}
+
+func (c *Checker) fetchLatestRelease(ctx context.Context) (semanticVersion, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, c.tagsURL, nil)
+	if err != nil {
+		return semanticVersion{}, fmt.Errorf("创建 GitHub Release 请求失败: %w", err)
+	}
+	request.Header.Set("Accept", "application/vnd.github+json")
+	request.Header.Set("User-Agent", "HiDeck-Update-Checker")
+	response, err := c.client.Do(request)
+	if err != nil {
+		return semanticVersion{}, fmt.Errorf("请求本仓库 GitHub Release 失败: %w", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode == http.StatusNotFound {
+		return semanticVersion{}, errors.New("本仓库尚未发布 GitHub Release；请先发布带二进制资产的版本")
+	}
+	if response.StatusCode != http.StatusOK {
+		return semanticVersion{}, fmt.Errorf("GitHub Release 接口返回 HTTP %d", response.StatusCode)
+	}
+	payload, err := io.ReadAll(io.LimitReader(response.Body, maxResponseBytes+1))
+	if err != nil {
+		return semanticVersion{}, fmt.Errorf("读取 GitHub Release 失败: %w", err)
+	}
+	if len(payload) > maxResponseBytes {
+		return semanticVersion{}, errors.New("GitHub Release 响应超过 2 MiB")
+	}
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+	if err := json.Unmarshal(payload, &release); err != nil {
+		return semanticVersion{}, fmt.Errorf("解析 GitHub Release 失败: %w", err)
+	}
+	version, err := parseStableVersion(release.TagName)
+	if err != nil {
+		return semanticVersion{}, fmt.Errorf("本仓库最新 Release 版本无效: %w", err)
+	}
+	return version, nil
 }
 
 func (c *Checker) fetchPage(ctx context.Context, endpoint string) (dockerHubTagsPage, error) {
@@ -246,12 +298,12 @@ func resolveNextPage(current *url.URL, rawNext string) (*url.URL, error) {
 
 func releaseMessage(hasUpdate, isDocker bool, latestVersion string) string {
 	if !hasUpdate {
-		return "当前版本不低于 Docker Hub 最新稳定版本。"
+		return "当前版本不低于本仓库最新稳定版本。"
 	}
 	if isDocker {
-		return fmt.Sprintf("Docker Hub 已发布 HiDeck %s，请拉取最新镜像并重新创建容器。", latestVersion)
+		return fmt.Sprintf("本仓库已发布 HiDeck %s，请从 ghcr.io/a765616527/hideck 拉取镜像并重新创建容器。", latestVersion)
 	}
-	return fmt.Sprintf("Docker Hub 已发布 HiDeck %s；当前构建不支持应用内热替换，请按现有部署方式升级。", latestVersion)
+	return fmt.Sprintf("本仓库已发布 HiDeck %s；当前构建不支持应用内热替换，请运行本仓库的 deploy-binary.sh 升级。", latestVersion)
 }
 
 func DetectDockerEnvironment() bool {

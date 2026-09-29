@@ -7,8 +7,8 @@
 [English](../README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Español](README.es.md) · **Français** · [Deutsch](README.de.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 
 <p>
-  <a href="https://github.com/yibaiba/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/yibaiba/hideck" alt="Release"></a>
-  <a href="https://hub.docker.com/r/yibaiba/hideck"><img src="https://img.shields.io/badge/docker-yibaiba%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
+  <a href="https://github.com/a765616527/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/a765616527/hideck" alt="Release"></a>
+  <a href="https://github.com/a765616527/hideck/pkgs/container/hideck"><img src="https://img.shields.io/badge/GHCR-a765616527%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
   <a href="../go.mod"><img src="https://img.shields.io/badge/Go-1.26.4%2B-00ADD8?logo=go" alt="Go"></a>
   <a href="../web/package.json"><img src="https://img.shields.io/badge/Vue-3-42b883?logo=vue.js" alt="Vue 3"></a>
   <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=License&message=PolyForm%20NC%201.0.0&color=blue" alt="License: PolyForm Noncommercial 1.0.0"></a>
@@ -42,11 +42,11 @@ Notes de protocole : [VoWiFi](../docs/vowifi-protocol-alignment.md) · [VoLTE](.
 Docker (recommandé). Il faut Linux, curl, Docker Compose, le réseau host et l’accès USB. L’image embarque les bibliothèques AMR/MP3 pour l’enregistrement d’appels.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
 ```
 
 Ouvrez `http://YOUR_IP:7575`.
@@ -54,12 +54,12 @@ Ouvrez `http://YOUR_IP:7575`.
 Avec un nom d’hôte public (DNS A/AAAA vers la machine, `443/TCP` et `443/UDP` ouverts) :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com \
   HIDECK_DIR=/opt/hideck sh
 ```
 
-Image : `yibaiba/hideck:latest`. Compose utilise `network_mode: host`, `privileged: true`, `/dev`, et persiste `config/`, `data/`, `logs/`. Voir [DOCKERHUB.md](../DOCKERHUB.md) et [HTTPS / WebRTC](../docs/https-webrtc.md).
+Image : `ghcr.io/a765616527/hideck:latest`. Compose utilise `network_mode: host`, `privileged: true`, `/dev`, et persiste `config/`, `data/`, `logs/`. Voir [DOCKERHUB.md](../DOCKERHUB.md) et [HTTPS / WebRTC](../docs/https-webrtc.md).
 
 ```bash
 docker compose ps
@@ -83,24 +83,23 @@ docker compose logs -f hideck
 ## Installation binaire
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | \
   HIDECK_DIR=/opt/hideck \
-  HIDECK_VERSION=v2.1.23 \
   HIDECK_ARCH=linux_amd64 sh
 ```
 
 | Fichier | Plateforme |
 | --- | --- |
-| `hideck_v2.1.23_linux_amd64` | x86_64, glibc + UPX |
-| `hideck_v2.1.23_linux_arm64` | ARM64 / Raspberry Pi OS 64 bits, glibc + UPX |
-| `hideck_v2.1.23_linux_armv7` | ARM 32 bits, glibc + UPX |
-| `hideck_v2.1.23_openwrt_amd64` | OpenWrt x86_64, musl statique, sans UPX |
-| `hideck_v2.1.23_openwrt_arm64` | OpenWrt aarch64 |
-| `hideck_v2.1.23_openwrt_armv7` | OpenWrt ARM 32 bits |
+| `hideck_vX.Y.Z_linux_amd64` | x86_64, glibc + UPX |
+| `hideck_vX.Y.Z_linux_arm64` | ARM64 / Raspberry Pi OS 64 bits, glibc + UPX |
+| `hideck_vX.Y.Z_linux_armv7` | ARM 32 bits, glibc + UPX |
+| `hideck_vX.Y.Z_openwrt_amd64` | OpenWrt x86_64, musl statique, sans UPX |
+| `hideck_vX.Y.Z_openwrt_arm64` | OpenWrt aarch64 |
+| `hideck_vX.Y.Z_openwrt_armv7` | OpenWrt ARM 32 bits |
 
 Sur OpenWrt, n’utilisez que `openwrt_*`. Voir [packaging/openwrt/README.md](../packaging/openwrt/README.md).
 

@@ -1,6 +1,6 @@
-# HiDeck Docker Hub 镜像
+# HiDeck GHCR 镜像
 
-镜像地址：`yibaiba/hideck`
+镜像地址：`ghcr.io/a765616527/hideck`。`main` 推送触发源码构建并发布 `latest`，发布新版本 tag 时还会生成对应版本镜像。
 
 支持架构：
 
@@ -12,16 +12,16 @@
 直接通过 curl 运行部署脚本，默认安装到当前目录下的 `hideck/`：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | sh
 ```
 
 自定义安装目录：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
 ```
 
-脚本会下载 `docker-compose.yml` 和配置模板，创建持久化目录并拉取 `latest`；不会覆盖已有的部署文件和 `config/config.yaml`。
+脚本会下载 `docker-compose.yml` 和配置模板，创建持久化目录并拉取 `latest`；不会覆盖已有的部署文件和 `config/config.yaml`。原来安装上游版的部署目录，须先手动将 `docker-compose.yml` 镜像改为 `ghcr.io/a765616527/hideck:latest` 再升级。
 
 ## 手工部署
 
@@ -56,7 +56,7 @@ vowifi:
 ```yaml
 services:
   hideck:
-    image: yibaiba/hideck:latest
+    image: ghcr.io/a765616527/hideck:latest
     container_name: hideck
     restart: unless-stopped
     init: true
@@ -92,48 +92,11 @@ Web 入口：`http://YOUR_IP:7575`
 
 ## 维护者发布
 
-发版镜像不再在 Docker 里编译或 `apk`。先打好 `dist/hideck_vX.Y.Z_linux_amd64` 和 `linux_arm64`，再拷进运行时底包。
+`main` 推送会触发 `.github/workflows/docker-build.yml`，从当前源码构建并发布 `ghcr.io/a765616527/hideck:latest`。DNS 镜像由 `.github/workflows/caddy-dns-build.yml` 构建。请确认 GitHub Packages 中的容器包设置为 public，才可匿名一键安装。
 
-原来的源码构建还在：根目录 `Dockerfile` + `docker-compose.source.yml`。更新 Alpine/录音库等依赖时走这条，或先重建 `hideck-runtime`，后面的发版镜像才会用到新底包。
+二进制安装走独立的 `.github/workflows/binary-release.yml`：在修复完成后推送新的 `vX.Y.Z` tag，等待工作流成功并确认 Release 包含 Linux/OpenWrt 二进制及 SHA256SUMS。复制过来的上游 tag 没有 fork 的 Release 资产，不能拿来安装。
 
-运行时底包（`ca-certificates`、AMR/MP3、`gcompat`、`qmi-proxy`）只在依赖变化时重建：
-
-```bash
-docker compose -f docker-compose.runtime.yml build --builder hideck-release --push
-```
-
-arm64 拉 Alpine 包若 TLS 失败，改用：
-
-```bash
-docker buildx build --builder hideck-release --allow network.host \
-  --platform linux/amd64,linux/arm64 -f Dockerfile.runtime \
-  -t yibaiba/hideck-runtime:3.24 -t yibaiba/hideck-runtime:latest --push .
-```
-
-每次发版：
-
-```bash
-# 先 make / 本地编出 UPX 后的 dist/hideck_v2.1.23_linux_amd64 和 linux_arm64
-export HIDECK_VERSION=2.1.23
-export HIDECK_MINOR_VERSION=2.1
-export HIDECK_REVISION="$(git rev-parse HEAD)"
-export HIDECK_BUILDTIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-
-docker compose -f docker-compose.build.yml build --builder hideck-release --push
-docker buildx imagetools inspect "yibaiba/hideck:${HIDECK_VERSION}"
-```
-
-服务器部署仍只用 `docker-compose.yml` 拉 `yibaiba/hideck:latest`，不会在服务器编译。
-
-从源码完整构建（更新依赖或不用预编译二进制）：
-
-```bash
-export HIDECK_VERSION=2.1.23
-export HIDECK_MINOR_VERSION=2.1
-export HIDECK_REVISION="$(git rev-parse HEAD)"
-export HIDECK_BUILDTIME="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-docker compose -f docker-compose.source.yml build --builder hideck-release --push
-```
+服务器部署仅拉取镜像，不在服务器上编译。需要手动构建镜像时，使用根目录 `Dockerfile.github` 和自己的 GHCR 地址；历史 Docker Hub 发布流程不用于本 fork。
 
 ## 更新镜像
 
@@ -183,7 +146,7 @@ After the normal Docker installation, save `docker-compose.pcsc.yml` from this
 repository alongside your existing `docker-compose.yml`, then recreate HiDeck:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/docker-compose.pcsc.yml \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/docker-compose.pcsc.yml \
   -o docker-compose.pcsc.yml
 test -S /run/pcscd/pcscd.comm
 docker compose -f docker-compose.yml -f docker-compose.pcsc.yml up -d

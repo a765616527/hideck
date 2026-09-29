@@ -7,8 +7,8 @@
 [English](../README.md) · [简体中文](README.zh-CN.md) · **日本語** · [한국어](README.ko.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 
 <p>
-  <a href="https://github.com/yibaiba/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/yibaiba/hideck" alt="Release"></a>
-  <a href="https://hub.docker.com/r/yibaiba/hideck"><img src="https://img.shields.io/badge/docker-yibaiba%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
+  <a href="https://github.com/a765616527/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/a765616527/hideck" alt="Release"></a>
+  <a href="https://github.com/a765616527/hideck/pkgs/container/hideck"><img src="https://img.shields.io/badge/GHCR-a765616527%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
   <a href="../go.mod"><img src="https://img.shields.io/badge/Go-1.26.4%2B-00ADD8?logo=go" alt="Go"></a>
   <a href="../web/package.json"><img src="https://img.shields.io/badge/Vue-3-42b883?logo=vue.js" alt="Vue 3"></a>
   <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=License&message=PolyForm%20NC%201.0.0&color=blue" alt="License: PolyForm Noncommercial 1.0.0"></a>
@@ -42,11 +42,11 @@ USB モデム、セルラープロキシ、SMS、WiFi calling / IMS 音声、eSI
 Docker を推奨します。Linux、curl、Docker Compose、ホストネットワーク、USB アクセスが必要です。イメージには通話録音用の AMR/MP3 ライブラリが含まれます。
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
 ```
 
 `http://YOUR_IP:7575` を開きます。
@@ -54,12 +54,12 @@ curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HID
 公開ホスト名（DNS の A/AAAA をホストへ、`443/TCP` と `443/UDP` を開放）：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com \
   HIDECK_DIR=/opt/hideck sh
 ```
 
-イメージ：`yibaiba/hideck:latest`。Compose は `network_mode: host`、`privileged: true`、`/dev` を使い、`config/`、`data/`、`logs/` を永続化します。[DOCKERHUB.md](../DOCKERHUB.md) と [HTTPS / WebRTC](../docs/https-webrtc.md) を参照してください。
+イメージ：`ghcr.io/a765616527/hideck:latest`。Compose は `network_mode: host`、`privileged: true`、`/dev` を使い、`config/`、`data/`、`logs/` を永続化します。[DOCKERHUB.md](../DOCKERHUB.md) と [HTTPS / WebRTC](../docs/https-webrtc.md) を参照してください。
 
 ```bash
 docker compose ps
@@ -83,24 +83,23 @@ docker compose logs -f hideck
 ## バイナリインストール
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | \
   HIDECK_DIR=/opt/hideck \
-  HIDECK_VERSION=v2.1.23 \
   HIDECK_ARCH=linux_amd64 sh
 ```
 
 | ファイル | 対象 |
 | --- | --- |
-| `hideck_v2.1.23_linux_amd64` | x86_64、glibc + UPX |
-| `hideck_v2.1.23_linux_arm64` | ARM64 / Raspberry Pi OS 64-bit、glibc + UPX |
-| `hideck_v2.1.23_linux_armv7` | 32-bit ARM、glibc + UPX |
-| `hideck_v2.1.23_openwrt_amd64` | OpenWrt x86_64、musl 静的、UPX なし |
-| `hideck_v2.1.23_openwrt_arm64` | OpenWrt aarch64 |
-| `hideck_v2.1.23_openwrt_armv7` | OpenWrt 32-bit ARM |
+| `hideck_vX.Y.Z_linux_amd64` | x86_64、glibc + UPX |
+| `hideck_vX.Y.Z_linux_arm64` | ARM64 / Raspberry Pi OS 64-bit、glibc + UPX |
+| `hideck_vX.Y.Z_linux_armv7` | 32-bit ARM、glibc + UPX |
+| `hideck_vX.Y.Z_openwrt_amd64` | OpenWrt x86_64、musl 静的、UPX なし |
+| `hideck_vX.Y.Z_openwrt_arm64` | OpenWrt aarch64 |
+| `hideck_vX.Y.Z_openwrt_armv7` | OpenWrt 32-bit ARM |
 
 OpenWrt では `openwrt_*` のみを使ってください。[packaging/openwrt/README.md](../packaging/openwrt/README.md) を参照。
 

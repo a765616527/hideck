@@ -2,8 +2,8 @@
 
 set -eu
 
-REPO="yibaiba/hideck"
-SOURCE_BASE_URL="https://raw.githubusercontent.com/yibaiba/hideck/main"
+REPO="a765616527/hideck"
+SOURCE_BASE_URL="https://raw.githubusercontent.com/a765616527/hideck/main"
 RELEASES_API_URL="https://api.github.com/repos/${REPO}/releases/latest"
 RELEASES_LATEST_URL="https://github.com/${REPO}/releases/latest"
 RELEASES_DOWNLOAD_URL="https://github.com/${REPO}/releases/download"
@@ -120,7 +120,7 @@ resolve_latest_version() {
     return
   fi
 
-  printf '无法从 GitHub Releases 读取最新版本。\n可设置 HIDECK_VERSION=v2.1.1 后重试。\n' >&2
+  printf '本仓库尚无可用的 GitHub Release。请先在 fork 发布包含二进制资产的版本。\n' >&2
   exit 1
 }
 
@@ -360,7 +360,7 @@ install_recording_libraries() {
     printf '录音依赖已安装。\n'
     return 0
   fi
-  printf '录音依赖未装全。打电话不受影响，只是不会生成 MP3/渠道语音。\n也可改用 Docker：\n  curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | sh\n'
+  printf '录音依赖未装全。打电话不受影响，只是不会生成 MP3/渠道语音。\n也可改用 Docker：\n  curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | sh\n'
   return 1
 }
 

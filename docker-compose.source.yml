@@ -4,7 +4,7 @@ name: hideck-image-source-build
 # 日常发版请用 docker-compose.build.yml，只把 dist/ 里的二进制拷进 hideck-runtime。
 services:
   hideck:
-    image: yibaiba/hideck:${HIDECK_VERSION:-2.1.23}
+    image: ghcr.io/a765616527/hideck:${HIDECK_VERSION:-2.1.23}
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,7 +19,7 @@ services:
         BUILDTIME: ${HIDECK_BUILDTIME:?HIDECK_BUILDTIME is required}
         ENABLE_UPX: ${HIDECK_ENABLE_UPX:-0}
       tags:
-        - yibaiba/hideck:${HIDECK_MINOR_VERSION:-2.1}
-        - yibaiba/hideck:${HIDECK_LATEST_TAG:-latest}
+        - ghcr.io/a765616527/hideck:${HIDECK_MINOR_VERSION:-2.1}
+        - ghcr.io/a765616527/hideck:${HIDECK_LATEST_TAG:-latest}
       provenance: false
       sbom: false

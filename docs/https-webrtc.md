@@ -324,7 +324,7 @@ Lucky 使用 Docker 运行时建议使用 host 网络，并自行配置宿主机
 选择网络模式后执行：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com \
   HIDECK_DIR=/opt/hideck sh
 ```
@@ -334,7 +334,7 @@ curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
 无法开放标准 ACME 端口时，可以使用自定义端口和 DNS-01。Cloudflare 示例：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com \
   HIDECK_HTTPS_PORT=8443 \
   HIDECK_DNS_PROVIDER=cloudflare \
@@ -464,7 +464,7 @@ Caddy 的证书状态保存在 Compose 的 `caddy_data` 卷中。
 
 ## DNS-01 服务商
 
-设置 `HIDECK_DNS_PROVIDER` 后，部署脚本会拉取预构建的 `yibaiba/hideck-caddy-dns:2.11.4`。该镜像同时包含四个 DNS 模块，实际使用的模块由 `HIDECK_DNS_PROVIDER` 决定。凭证仅写入权限为 `0600` 的 `caddy.env` 并注入 Caddy，不会进入镜像或 HiDeck 容器。
+设置 `HIDECK_DNS_PROVIDER` 后，部署脚本会拉取预构建的 `ghcr.io/a765616527/hideck-caddy-dns:2.11.4`。该镜像同时包含四个 DNS 模块，实际使用的模块由 `HIDECK_DNS_PROVIDER` 决定。凭证仅写入权限为 `0600` 的 `caddy.env` 并注入 Caddy，不会进入镜像或 HiDeck 容器。
 
 | `HIDECK_DNS_PROVIDER` | 必需环境变量 |
 | --- | --- |
@@ -476,7 +476,7 @@ Caddy 的证书状态保存在 Compose 的 `caddy_data` 卷中。
 阿里云示例：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com HIDECK_HTTPS_PORT=8443 \
   HIDECK_DNS_PROVIDER=alidns \
   ALIYUN_ACCESS_KEY_ID=your_id ALIYUN_ACCESS_KEY_SECRET=your_secret \
@@ -486,7 +486,7 @@ curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
 腾讯云 DNSPod 示例：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com HIDECK_HTTPS_PORT=8443 \
   HIDECK_DNS_PROVIDER=tencentcloud \
   TENCENTCLOUD_SECRET_ID=your_id TENCENTCLOUD_SECRET_KEY=your_key \
@@ -496,7 +496,7 @@ curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
 AWS Route53 示例：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com HIDECK_HTTPS_PORT=8443 \
   HIDECK_DNS_PROVIDER=route53 \
   AWS_ACCESS_KEY_ID=your_id AWS_SECRET_ACCESS_KEY=your_secret AWS_REGION=us-east-1 \

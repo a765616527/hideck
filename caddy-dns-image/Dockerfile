@@ -16,5 +16,5 @@ RUN --mount=type=cache,target=/go/pkg/mod,id=hideck-caddy-dns-gomod,sharing=lock
 FROM caddy:${CADDY_VERSION}-alpine
 LABEL org.opencontainers.image.title="HiDeck Caddy DNS" \
       org.opencontainers.image.description="Caddy with Cloudflare, AliDNS, Tencent Cloud DNS and Route53 modules" \
-      org.opencontainers.image.source="https://github.com/yibaiba/hideck"
+      org.opencontainers.image.source="https://github.com/a765616527/hideck"
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy

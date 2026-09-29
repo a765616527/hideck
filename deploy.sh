@@ -2,7 +2,7 @@
 
 set -eu
 
-SOURCE_BASE_URL="https://raw.githubusercontent.com/yibaiba/hideck/main"
+SOURCE_BASE_URL="https://raw.githubusercontent.com/a765616527/hideck/main"
 MIN_PORT=1
 MAX_PORT=65535
 
@@ -67,7 +67,14 @@ download_if_missing() {
 }
 
 initialize_deployment_files() {
-  download_if_missing "$COMPOSE_FILE" "$SOURCE_BASE_URL/docker-compose.yml" 644
+  if [ -f "$COMPOSE_FILE" ]; then
+    if grep -q 'image: yibaiba/hideck:latest' "$COMPOSE_FILE"; then
+      printf '旧部署文件仍使用上游镜像：%s\n请备份并手动将 image 改为 ghcr.io/a765616527/hideck:latest 后重试。\n' "$COMPOSE_FILE" >&2
+      exit 1
+    fi
+  else
+    download_if_missing "$COMPOSE_FILE" "$SOURCE_BASE_URL/docker-compose.yml" 644
+  fi
   download_if_missing "$CONFIG_EXAMPLE" "$SOURCE_BASE_URL/config/config.example.yaml" 644
   if ! caddy_requested; then
     return
@@ -79,6 +86,10 @@ initialize_deployment_files() {
     return
   fi
 
+  if [ -f "$CADDY_DNS_COMPOSE_FILE" ] && grep -q 'image: yibaiba/hideck-caddy-dns:' "$CADDY_DNS_COMPOSE_FILE"; then
+    printf '旧 DNS 部署文件仍使用上游镜像：%s\n请手动将 image 改为 ghcr.io/a765616527/hideck-caddy-dns:2.11.4 后重试。\n' "$CADDY_DNS_COMPOSE_FILE" >&2
+    exit 1
+  fi
   download_if_missing "$CADDY_DNS_COMPOSE_FILE" "$SOURCE_BASE_URL/docker-compose.caddy-dns.yml" 644
   download_if_missing "$CADDY_DNS_FILE" "$SOURCE_BASE_URL/Caddyfile.dns" 644
   download_if_missing "$CADDY_DNS_DIR/cloudflare.caddy" "$SOURCE_BASE_URL/caddy-dns/cloudflare.caddy" 644

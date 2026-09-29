@@ -5,7 +5,7 @@ PKG_VERSION:=2.1.15
 PKG_RELEASE:=1
 
 PKG_LICENSE:=SEE LICENSE
-PKG_MAINTAINER:=yibaiba <https://github.com/yibaiba/hideck>
+PKG_MAINTAINER:=a765616527 <https://github.com/a765616527/hideck>
 
 ifeq ($(ARCH),x86_64)
   HIDECK_BINARCH:=amd64
@@ -18,7 +18,7 @@ else
 endif
 
 PKG_SOURCE:=hideck_v$(PKG_VERSION)_openwrt_$(HIDECK_BINARCH)
-PKG_SOURCE_URL:=https://github.com/yibaiba/hideck/releases/download/v$(PKG_VERSION)
+PKG_SOURCE_URL:=https://github.com/a765616527/hideck/releases/download/v$(PKG_VERSION)
 PKG_HASH:=skip
 
 include $(INCLUDE_DIR)/package.mk
@@ -27,7 +27,7 @@ define Package/hideck
   SECTION:=net
   CATEGORY:=Network
   TITLE:=HiDeck modem management
-  URL:=https://github.com/yibaiba/hideck
+  URL:=https://github.com/a765616527/hideck
   DEPENDS:=+libqmi +kmod-usb-net-qmi-wwan +kmod-usb-serial-option
 endef
 

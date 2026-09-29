@@ -82,7 +82,7 @@ ARG REVISION=unknown
 WORKDIR /app
 LABEL org.opencontainers.image.title="HiDeck" \
       org.opencontainers.image.description="Qualcomm modem management platform" \
-      org.opencontainers.image.source="https://github.com/yibaiba/hideck" \
+      org.opencontainers.image.source="https://github.com/a765616527/hideck" \
       org.opencontainers.image.version=${VERSION} \
       org.opencontainers.image.created=${BUILDTIME} \
       org.opencontainers.image.revision=${REVISION}

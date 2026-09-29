@@ -2,7 +2,7 @@ name: hideck-image-build
 
 services:
   hideck:
-    image: yibaiba/hideck:${HIDECK_VERSION:-2.1.23}
+    image: ghcr.io/a765616527/hideck:${HIDECK_VERSION:-2.1.23}
     build:
       context: .
       dockerfile: Dockerfile.release
@@ -15,7 +15,7 @@ services:
         REVISION: ${HIDECK_REVISION:?HIDECK_REVISION is required}
         BUILDTIME: ${HIDECK_BUILDTIME:?HIDECK_BUILDTIME is required}
       tags:
-        - yibaiba/hideck:${HIDECK_MINOR_VERSION:-2.1}
-        - yibaiba/hideck:${HIDECK_LATEST_TAG:-latest}
+        - ghcr.io/a765616527/hideck:${HIDECK_MINOR_VERSION:-2.1}
+        - ghcr.io/a765616527/hideck:${HIDECK_LATEST_TAG:-latest}
       provenance: false
       sbom: false

@@ -36,11 +36,50 @@ func TestCheckerFindsLatestStableDockerTagAcrossPages(t *testing.T) {
 	if !info.HasUpdate || info.LatestVer != "2.1.0" || !info.IsDocker {
 		t.Fatalf("CheckUpdate() = %+v, want Docker update 2.1.0", info)
 	}
-	if !strings.Contains(info.ReleaseNote, "拉取最新镜像") {
+	if !strings.Contains(info.ReleaseNote, "ghcr.io/a765616527/hideck") {
 		t.Fatalf("ReleaseNote = %q, want Docker deployment instructions", info.ReleaseNote)
 	}
 	if requests.Load() != 2 {
 		t.Fatalf("requests = %d, want 2", requests.Load())
+	}
+}
+
+func TestDefaultCheckerUsesForkRelease(t *testing.T) {
+	checker := NewChecker(nil, CheckerOptions{CurrentVersion: "v2.1.23"})
+	if checker.tagsURL != forkLatestReleaseURL || !checker.useReleases {
+		t.Fatalf("default release source = %q, releases=%v", checker.tagsURL, checker.useReleases)
+	}
+	server := newTagsServer(t, http.StatusOK, `{"tag_name":"v2.1.24"}`)
+	checker.client = server.Client()
+	checker.tagsURL = server.URL
+	info, err := checker.CheckUpdate(context.Background())
+	if err != nil {
+		t.Fatalf("CheckUpdate() error = %v", err)
+	}
+	if !info.HasUpdate || info.LatestVer != "v2.1.24" {
+		t.Fatalf("CheckUpdate() = %+v, %v", info, err)
+	}
+}
+
+func TestDefaultCheckerExplainsMissingForkRelease(t *testing.T) {
+	checker := NewChecker(nil, CheckerOptions{CurrentVersion: "v2.1.23"})
+	server := newTagsServer(t, http.StatusNotFound, `{}`)
+	checker.client = server.Client()
+	checker.tagsURL = server.URL
+	_, err := checker.CheckUpdate(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "尚未发布") {
+		t.Fatalf("CheckUpdate() error = %v", err)
+	}
+}
+
+func TestDefaultCheckerDoesNotTreatMainBuildAsOldRelease(t *testing.T) {
+	checker := NewChecker(nil, CheckerOptions{CurrentVersion: "dev-abc1234", IsDocker: true})
+	server := newTagsServer(t, http.StatusOK, `{"tag_name":"v2.1.24"}`)
+	checker.client = server.Client()
+	checker.tagsURL = server.URL
+	info, err := checker.CheckUpdate(context.Background())
+	if err != nil || info.HasUpdate || !strings.Contains(info.ReleaseNote, "开发构建") {
+		t.Fatalf("CheckUpdate() = %+v, %v", info, err)
 	}
 }
 

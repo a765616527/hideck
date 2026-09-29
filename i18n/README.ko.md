@@ -7,8 +7,8 @@
 [English](../README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · **한국어** · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Português](README.pt-BR.md) · [Русский](README.ru.md)
 
 <p>
-  <a href="https://github.com/yibaiba/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/yibaiba/hideck" alt="Release"></a>
-  <a href="https://hub.docker.com/r/yibaiba/hideck"><img src="https://img.shields.io/badge/docker-yibaiba%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
+  <a href="https://github.com/a765616527/hideck/releases/latest"><img src="https://img.shields.io/github/v/release/a765616527/hideck" alt="Release"></a>
+  <a href="https://github.com/a765616527/hideck/pkgs/container/hideck"><img src="https://img.shields.io/badge/GHCR-a765616527%2Fhideck-2496ED?logo=docker&logoColor=white" alt="Docker"></a>
   <a href="../go.mod"><img src="https://img.shields.io/badge/Go-1.26.4%2B-00ADD8?logo=go" alt="Go"></a>
   <a href="../web/package.json"><img src="https://img.shields.io/badge/Vue-3-42b883?logo=vue.js" alt="Vue 3"></a>
   <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=License&message=PolyForm%20NC%201.0.0&color=blue" alt="License: PolyForm Noncommercial 1.0.0"></a>
@@ -42,11 +42,11 @@
 Docker를 권장합니다. Linux, curl, Docker Compose, 호스트 네트워크, USB 접근이 필요합니다. 이미지에 통화 녹음용 AMR/MP3 라이브러리가 포함됩니다.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | HIDECK_DIR=/opt/hideck sh
 ```
 
 `http://YOUR_IP:7575` 을 엽니다.
@@ -54,12 +54,12 @@ curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | HID
 공인 호스트 이름 (DNS A/AAAA를 호스트로, `443/TCP`와 `443/UDP` 개방):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy.sh | \
   HIDECK_DOMAIN=hideck.example.com \
   HIDECK_DIR=/opt/hideck sh
 ```
 
-이미지: `yibaiba/hideck:latest`. Compose는 `network_mode: host`, `privileged: true`, `/dev`를 사용하고 `config/`, `data/`, `logs/`를 유지합니다. [DOCKERHUB.md](../DOCKERHUB.md)와 [HTTPS / WebRTC](../docs/https-webrtc.md)를 참고하세요.
+이미지: `ghcr.io/a765616527/hideck:latest`. Compose는 `network_mode: host`, `privileged: true`, `/dev`를 사용하고 `config/`, `data/`, `logs/`를 유지합니다. [DOCKERHUB.md](../DOCKERHUB.md)와 [HTTPS / WebRTC](../docs/https-webrtc.md)를 참고하세요.
 
 ```bash
 docker compose ps
@@ -83,24 +83,23 @@ docker compose logs -f hideck
 ## 바이너리 설치
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | sh
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | sh
 ```
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yibaiba/hideck/main/deploy-binary.sh | \
+curl -fsSL https://raw.githubusercontent.com/a765616527/hideck/main/deploy-binary.sh | \
   HIDECK_DIR=/opt/hideck \
-  HIDECK_VERSION=v2.1.23 \
   HIDECK_ARCH=linux_amd64 sh
 ```
 
 | 파일 | 플랫폼 |
 | --- | --- |
-| `hideck_v2.1.23_linux_amd64` | x86_64, glibc + UPX |
-| `hideck_v2.1.23_linux_arm64` | ARM64 / Raspberry Pi OS 64-bit, glibc + UPX |
-| `hideck_v2.1.23_linux_armv7` | 32-bit ARM, glibc + UPX |
-| `hideck_v2.1.23_openwrt_amd64` | OpenWrt x86_64, musl 정적, UPX 없음 |
-| `hideck_v2.1.23_openwrt_arm64` | OpenWrt aarch64 |
-| `hideck_v2.1.23_openwrt_armv7` | OpenWrt 32-bit ARM |
+| `hideck_vX.Y.Z_linux_amd64` | x86_64, glibc + UPX |
+| `hideck_vX.Y.Z_linux_arm64` | ARM64 / Raspberry Pi OS 64-bit, glibc + UPX |
+| `hideck_vX.Y.Z_linux_armv7` | 32-bit ARM, glibc + UPX |
+| `hideck_vX.Y.Z_openwrt_amd64` | OpenWrt x86_64, musl 정적, UPX 없음 |
+| `hideck_vX.Y.Z_openwrt_arm64` | OpenWrt aarch64 |
+| `hideck_vX.Y.Z_openwrt_armv7` | OpenWrt 32-bit ARM |
 
 OpenWrt에서는 `openwrt_*`만 사용하세요. [packaging/openwrt/README.md](../packaging/openwrt/README.md)를 참고하세요.
 

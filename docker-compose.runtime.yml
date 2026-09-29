@@ -2,7 +2,7 @@ name: hideck-runtime-image
 
 services:
   hideck-runtime:
-    image: yibaiba/hideck-runtime:3.24
+    image: ghcr.io/a765616527/hideck-runtime:3.24
     build:
       context: .
       dockerfile: Dockerfile.runtime
@@ -11,6 +11,6 @@ services:
         - linux/amd64
         - linux/arm64
       tags:
-        - yibaiba/hideck-runtime:latest
+        - ghcr.io/a765616527/hideck-runtime:latest
       provenance: false
       sbom: false
