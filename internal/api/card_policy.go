@@ -109,6 +109,7 @@ func (s *Server) handlePutCardPolicy(c *gin.Context) {
 		PhoneMode             *string `json:"phone_mode"`
 		DataStrategy          *string `json:"data_strategy"`
 		VowifiUpstreamProxyID *string `json:"vowifi_upstream_proxy_id"`
+		VoWiFiExpectedPLMN    *string `json:"vowifi_expected_plmn"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -123,6 +124,7 @@ func (s *Server) handlePutCardPolicy(c *gin.Context) {
 		return
 	}
 	previousProxyID := pol.VowifiUpstreamProxyID
+	previousExpectedPLMN := pol.VoWiFiExpectedPLMN
 
 	class, classifyErr := s.classifyLebaraUKForICCID(c.Request.Context(), iccid)
 	if classifyErr != nil {
@@ -180,6 +182,14 @@ func (s *Server) handlePutCardPolicy(c *gin.Context) {
 		}
 		pol.VowifiUpstreamProxyID = id
 	}
+	if req.VoWiFiExpectedPLMN != nil {
+		plmn := strings.TrimSpace(*req.VoWiFiExpectedPLMN)
+		if !db.ValidVoWiFiExpectedPLMN(plmn) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "VoWiFi 预期 PLMN 须为 5 或 6 位数字"})
+			return
+		}
+		pol.VoWiFiExpectedPLMN = plmn
+	}
 	pol.Source = "user"
 
 	if err := s.cardPolicyStore().Upsert(pol); err != nil {
@@ -187,7 +197,9 @@ func (s *Server) handlePutCardPolicy(c *gin.Context) {
 		return
 	}
 
-	if req.VowifiUpstreamProxyID != nil && previousProxyID != pol.VowifiUpstreamProxyID && pol.VoWiFiEnabled {
+	proxyChanged := req.VowifiUpstreamProxyID != nil && previousProxyID != pol.VowifiUpstreamProxyID
+	plmnChanged := req.VoWiFiExpectedPLMN != nil && previousExpectedPLMN != pol.VoWiFiExpectedPLMN
+	if (proxyChanged || plmnChanged) && pol.VoWiFiEnabled {
 		if err := s.restartVoWiFiForCardPolicy(pol.ICCID); err != nil {
 			logger.Warn("卡策略前置代理已保存，但 WiFi calling 重连失败",
 				"iccid", pol.ICCID,

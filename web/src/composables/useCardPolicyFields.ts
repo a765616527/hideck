@@ -1,7 +1,7 @@
 import { ref, watch, type Ref } from 'vue'
 import type { CardPolicy } from '../types/api'
 
-type EditablePolicyFields = Pick<CardPolicy, 'ip_version' | 'apn' | 'vowifi_upstream_proxy_id'>
+type EditablePolicyFields = Pick<CardPolicy, 'ip_version' | 'apn' | 'vowifi_upstream_proxy_id' | 'vowifi_expected_plmn'>
 type SaveResult = { ok: boolean; error?: { message?: string; code?: string } }
 
 export const CARD_POLICY_SAVED_RESTART_FAILED = 'card_policy_saved_restart_failed'
@@ -14,6 +14,7 @@ export function useCardPolicyFields(
   const ipVersion = ref<CardPolicy['ip_version']>('v4')
   const apn = ref('')
   const vowifiUpstreamProxyID = ref('')
+  const vowifiExpectedPLMN = ref('')
   const pending = ref<keyof EditablePolicyFields | null>(null)
   const error = ref('')
   const errorCode = ref('')
@@ -24,11 +25,13 @@ export function useCardPolicyFields(
     ipVersion.value = policy.ip_version || 'v4'
     apn.value = policy.apn || ''
     vowifiUpstreamProxyID.value = policy.vowifi_upstream_proxy_id || ''
+    vowifiExpectedPLMN.value = policy.vowifi_expected_plmn || ''
   }, { immediate: true })
 
   function currentValue(field: keyof EditablePolicyFields) {
     if (field === 'ip_version') return ipVersion.value
     if (field === 'apn') return apn.value
+    if (field === 'vowifi_expected_plmn') return vowifiExpectedPLMN.value
     return vowifiUpstreamProxyID.value
   }
 
@@ -36,6 +39,7 @@ export function useCardPolicyFields(
     if (!source.value) return
     if (field === 'ip_version') ipVersion.value = source.value.ip_version
     else if (field === 'apn') apn.value = source.value.apn || ''
+    else if (field === 'vowifi_expected_plmn') vowifiExpectedPLMN.value = source.value.vowifi_expected_plmn || ''
     else vowifiUpstreamProxyID.value = source.value.vowifi_upstream_proxy_id || ''
   }
 
@@ -65,9 +69,10 @@ export function useCardPolicyFields(
   }
 
   return {
-    ipVersion, apn, vowifiUpstreamProxyID, pending, error, errorCode, errorField,
+    ipVersion, apn, vowifiUpstreamProxyID, vowifiExpectedPLMN, pending, error, errorCode, errorField,
     saveIPVersion: () => persist('ip_version'),
     saveAPN: () => persist('apn'),
-    saveVowifiUpstreamProxy: () => persist('vowifi_upstream_proxy_id')
+    saveVowifiUpstreamProxy: () => persist('vowifi_upstream_proxy_id'),
+    saveVowifiExpectedPLMN: () => persist('vowifi_expected_plmn')
   }
 }

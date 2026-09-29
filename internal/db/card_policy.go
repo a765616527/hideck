@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"time"
 
@@ -20,6 +21,7 @@ type CardPolicy struct {
 	PhoneMode             string    `gorm:"column:phone_mode;default:wifi" json:"phone_mode"`            // wifi | cellular | volte
 	DataStrategy          string    `gorm:"column:data_strategy;default:on_demand" json:"data_strategy"` // always | on_demand
 	VowifiUpstreamProxyID string    `gorm:"column:vowifi_upstream_proxy_id" json:"vowifi_upstream_proxy_id"`
+	VoWiFiExpectedPLMN    string    `gorm:"column:vowifi_expected_plmn" json:"vowifi_expected_plmn"`
 	Source                string    `gorm:"column:source" json:"source"` // auto | user
 	CreatedAt             time.Time `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt             time.Time `gorm:"column:updated_at" json:"updated_at"`
@@ -29,6 +31,12 @@ func (CardPolicy) TableName() string { return "card_policies" }
 
 // VoWiFiUpstreamProxyDirect 表示这张卡强制直连，不走国家前置代理。
 const VoWiFiUpstreamProxyDirect = "direct"
+
+var validVoWiFiExpectedPLMN = regexp.MustCompile(`^[0-9]{5,6}$`)
+
+func ValidVoWiFiExpectedPLMN(plmn string) bool {
+	return plmn == "" || validVoWiFiExpectedPLMN.MatchString(plmn)
+}
 
 // CanonicalICCID 规整 ICCID 为唯一形态：trim 空白、去引号、去尾部 BCD 填充位 F/f。
 // 必须用于 card_policies 的所有读写边界——否则 eSIM profile 侧（BCD 解码已剥 F）与
@@ -85,6 +93,7 @@ func NormalizeCardPolicy(p *CardPolicy) {
 		p.DataStrategy = "on_demand"
 	}
 	p.VowifiUpstreamProxyID = NormalizeVoWiFiUpstreamProxyID(p.VowifiUpstreamProxyID)
+	p.VoWiFiExpectedPLMN = strings.TrimSpace(p.VoWiFiExpectedPLMN)
 }
 
 func NormalizeVoWiFiUpstreamProxyID(id string) string {
@@ -121,6 +130,9 @@ func UpsertCardPolicy(p CardPolicy) error {
 	if p.ICCID == "" {
 		return errors.New("ICCID 为空")
 	}
+	if !ValidVoWiFiExpectedPLMN(p.VoWiFiExpectedPLMN) {
+		return errors.New("VoWiFi 预期 PLMN 须为 5 或 6 位数字")
+	}
 	now := time.Now()
 	if p.CreatedAt.IsZero() {
 		p.CreatedAt = now
@@ -137,6 +149,7 @@ func UpsertCardPolicy(p CardPolicy) error {
 			"phone_mode":               p.PhoneMode,
 			"data_strategy":            p.DataStrategy,
 			"vowifi_upstream_proxy_id": p.VowifiUpstreamProxyID,
+			"vowifi_expected_plmn":     p.VoWiFiExpectedPLMN,
 			"source":                   p.Source,
 			"updated_at":               p.UpdatedAt,
 		}),

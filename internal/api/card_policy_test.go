@@ -189,6 +189,37 @@ func TestPutCardPolicyVoWiFiUpstreamProxy(t *testing.T) {
 	}
 }
 
+func TestPutCardPolicyExpectedPLMNRestartsAndClears(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	store := &cardPolicyStoreStub{policy: db.CardPolicy{ICCID: "8963660000000000001", VoWiFiEnabled: true}}
+	restarter := &cardPolicyRestarterStub{}
+	s := &Server{cardPolicies: store, cardPolicyRestarter: restarter}
+	r := gin.New()
+	r.PUT("/api/cards/:iccid/policy", s.handlePutCardPolicy)
+	put := func(body string) int {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPut, "/api/cards/8963660000000000001/policy", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		r.ServeHTTP(w, req)
+		return w.Code
+	}
+	if code := put(`{"vowifi_expected_plmn":" 51566 "}`); code != http.StatusOK {
+		t.Fatalf("code=%d", code)
+	}
+	if store.policy.VoWiFiExpectedPLMN != "51566" || restarter.iccid != store.policy.ICCID {
+		t.Fatalf("policy=%+v restart=%q", store.policy, restarter.iccid)
+	}
+	if code := put(`{"vowifi_expected_plmn":"bad-value"}`); code != http.StatusBadRequest {
+		t.Fatalf("invalid code=%d", code)
+	}
+	if store.policy.VoWiFiExpectedPLMN != "51566" {
+		t.Fatal("invalid input changed stored policy")
+	}
+	if code := put(`{"vowifi_expected_plmn":""}`); code != http.StatusOK || store.policy.VoWiFiExpectedPLMN != "" {
+		t.Fatalf("clear code=%d policy=%+v", code, store.policy)
+	}
+}
+
 func TestPutCardPolicyReportsSavedPolicyWhenVoWiFiRestartFails(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	openTestDB(t)

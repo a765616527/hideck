@@ -9,10 +9,35 @@ func TestCardPolicyTableMigrated(t *testing.T) {
 	if !DB.Migrator().HasTable(&CardPolicy{}) {
 		t.Fatal("card_policies 表未建")
 	}
-	for _, col := range []string{"iccid", "network_enabled", "vowifi_enabled", "airplane_enabled", "ip_version", "apn", "vowifi_upstream_proxy_id", "source"} {
+	for _, col := range []string{"iccid", "network_enabled", "vowifi_enabled", "airplane_enabled", "ip_version", "apn", "vowifi_upstream_proxy_id", "vowifi_expected_plmn", "source"} {
 		if !DB.Migrator().HasColumn(&CardPolicy{}, col) {
 			t.Fatalf("card_policies 缺列 %s", col)
 		}
+	}
+}
+
+func TestVoWiFiExpectedPLMNPersistsAndClears(t *testing.T) {
+	openTestDB(t)
+	p := DefaultCardPolicy("8963660000000000001F")
+	p.VoWiFiExpectedPLMN = " 51566 "
+	if err := UpsertCardPolicy(p); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := GetCardPolicy("8963660000000000001")
+	if err != nil || stored.VoWiFiExpectedPLMN != "51566" {
+		t.Fatalf("stored=%+v err=%v", stored, err)
+	}
+	p.VoWiFiExpectedPLMN = "invalid"
+	if err := UpsertCardPolicy(p); err == nil {
+		t.Fatal("invalid PLMN must be rejected")
+	}
+	p.VoWiFiExpectedPLMN = ""
+	if err := UpsertCardPolicy(p); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = GetCardPolicy(p.ICCID)
+	if err != nil || stored.VoWiFiExpectedPLMN != "" {
+		t.Fatalf("cleared=%+v err=%v", stored, err)
 	}
 }
 

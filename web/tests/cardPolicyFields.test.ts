@@ -65,6 +65,25 @@ test('saving a VoWiFi upstream proxy override persists the selected node', async
   assert.deepEqual(patches, [{ vowifi_upstream_proxy_id: 'uk-node-2' }])
 })
 
+test('DITO VoWiFi identity can be pinned and reset per ICCID', async () => {
+  const source = ref<CardPolicy | null>(policy())
+  const patches: Array<Record<string, unknown>> = []
+  const fields = useCardPolicyFields(source, async (patch) => {
+    patches.push(patch)
+    return { ok: true }
+  })
+  await nextTick()
+
+  fields.vowifiExpectedPLMN.value = '51566'
+  await fields.saveVowifiExpectedPLMN()
+  source.value = { ...source.value!, vowifi_expected_plmn: '51566' }
+  await nextTick()
+  fields.vowifiExpectedPLMN.value = ''
+  await fields.saveVowifiExpectedPLMN()
+
+  assert.deepEqual(patches, [{ vowifi_expected_plmn: '51566' }, { vowifi_expected_plmn: '' }])
+})
+
 test('a saved proxy policy keeps its value and exposes a restart failure', async () => {
   const source = ref<CardPolicy | null>(policy())
   let changed = 0

@@ -6,10 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yibaiba/hideck/internal/modem"
-	"github.com/yibaiba/hideck/pkg/logger"
 	"github.com/iniwex5/vowifi-go/runtimehost"
 	"github.com/iniwex5/vowifi-go/runtimehost/identity"
+	"github.com/yibaiba/hideck/internal/db"
+	"github.com/yibaiba/hideck/internal/modem"
+	"github.com/yibaiba/hideck/pkg/logger"
 )
 
 func (p *Pool) buildVoWiFiStartProfile(worker *Worker, traceID string) (identity.Profile, error) {
@@ -41,9 +42,20 @@ func (p *Pool) buildVoWiFiStartProfile(worker *Worker, traceID string) (identity
 	if mcc == "" || mnc == "" {
 		return identity.Profile{}, fmt.Errorf("缺少 SIM 归属 MCC/MNC，无法构建 VoWiFi 启动画像: %s", imsi)
 	}
+	iccid := db.CanonicalICCID(worker.CurrentICCID())
+	carrierIdentity, err := resolveVoWiFiCarrierIdentity(iccid, imsi, mcc, mnc)
+	if err != nil {
+		return identity.Profile{}, err
+	}
+	if err := carrierIdentity.check(imsi); err != nil {
+		logger.Warn("VoWiFi 卡身份与实时 IMSI 不匹配", "trace_id", traceID, "device", worker.ID,
+			"expected_plmn", carrierIdentity.ExpectedPLMN, "live_plmn", carrierIdentity.LivePLMN,
+			"preset_selection_source", carrierIdentity.Source)
+		return identity.Profile{}, err
+	}
 
 	imei := strings.TrimSpace(status.IMEI)
-	iccid := strings.TrimSpace(status.ICCID)
+	iccid = strings.TrimSpace(status.ICCID)
 
 	smsc := p.resolveVoWiFiSMSC(worker, imsi, iccid, traceID)
 
@@ -52,6 +64,7 @@ func (p *Pool) buildVoWiFiStartProfile(worker *Worker, traceID string) (identity
 		"device", worker.ID,
 		"source", "live_imsi",
 		"plmn_source", plmnSource,
+		"preset_selection_source", carrierIdentity.Source,
 		"native_mcc", strings.TrimSpace(status.NativeMCC),
 		"native_mnc", strings.TrimSpace(status.NativeMNC),
 		"iccid", iccid,

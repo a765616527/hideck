@@ -51,6 +51,16 @@ func (p *Pool) reconcileDesiredVoWiFiOnce(now time.Time) {
 
 	candidates := make([]string, 0, len(workers))
 	for _, w := range workers {
+		status := w.ProjectDeviceStatus()
+		identity, err := resolveVoWiFiCarrierIdentity(w.CurrentICCID(), status.IMSI, status.NativeMCC, status.NativeMNC)
+		if err != nil {
+			logger.Warn("VoWiFi 目标态检查失败：无法核对卡身份", "device", w.ID, "err", err)
+			continue
+		}
+		if identity.mismatch(status.IMSI) {
+			p.stopMismatchedVoWiFi(w, identity)
+			continue
+		}
 		class, err := ClassifyWorkerLebaraUK(w)
 		if err != nil {
 			logger.Warn("VoWiFi 目标态检查失败：无法识别 Lebara UK 状态",
@@ -126,6 +136,18 @@ func (p *Pool) shouldReconcileVoWiFiForReason(w *Worker, reason string) bool {
 		return false
 	}
 	if !p.currentCardPolicyAllowsVoWiFi(w, status.ICCID, reason) {
+		return false
+	}
+	identity, err := resolveVoWiFiCarrierIdentity(w.CurrentICCID(), imsi, status.NativeMCC, status.NativeMNC)
+	if err != nil {
+		logger.Warn("VoWiFi 目标态恢复跳过：无法核对卡身份", "device", deviceID, "err", err)
+		return false
+	}
+	if identity.mismatch(imsi) {
+		p.clearDesiredVoWiFiRecoverState(deviceID)
+		logger.Warn("VoWiFi 目标态恢复跳过：卡 IMSI 与预期不符", "device", deviceID,
+			"expected_plmn", identity.ExpectedPLMN, "live_plmn", identity.LivePLMN,
+			"preset_selection_source", identity.Source)
 		return false
 	}
 	mcc, _, _ := vowifiProfileMCCMNC(status)

@@ -39,7 +39,7 @@ const mirror = computed<PolicyMirror | null>(() =>
     : null
 )
 
-const { ipVersion, apn, vowifiUpstreamProxyID, pending: fieldPending, error: fieldError, errorCode: fieldErrorCode, errorField, saveIPVersion, saveAPN, saveVowifiUpstreamProxy } =
+const { ipVersion, apn, vowifiUpstreamProxyID, vowifiExpectedPLMN, pending: fieldPending, error: fieldError, errorCode: fieldErrorCode, errorField, saveIPVersion, saveAPN, saveVowifiUpstreamProxy, saveVowifiExpectedPLMN } =
   useCardPolicyFields(toRef(props, 'policy'), async (patch) => {
     if (!props.iccid) return { ok: false, error: { message: 'SIM 身份未就绪' } }
     return cardsService.putPolicy(props.iccid, patch)
@@ -187,6 +187,24 @@ const airplaneHint = computed(() => {
       </div>
 
       <div class="policy-setting-list">
+        <div class="policy-setting-row">
+          <span><strong>VoWiFi 归属</strong><small>DITO 身份切到 204/04 时停止错误的 ePDG 重试，不会伪造 IMSI</small></span>
+          <div class="policy-field-control">
+            <el-select
+              v-model="vowifiExpectedPLMN"
+              class="w-full"
+              :disabled="!canEditPolicy || fieldPending !== null"
+              @change="saveVowifiExpectedPLMN"
+            >
+              <el-option label="自动识别" value="" />
+              <el-option label="菲律宾 DITO (515/66)" value="51566" />
+            </el-select>
+            <small v-if="fieldPending === 'vowifi_expected_plmn'">{{ local.vowifi_enabled ? '正在保存并重连…' : '正在保存...' }}</small>
+            <div v-if="fieldError && errorField === 'vowifi_expected_plmn'" role="alert" class="text-xs text-red-600 dark:text-red-400">
+              {{ fieldError }}<template v-if="fieldErrorCode !== CARD_POLICY_SAVED_RESTART_FAILED">，请重试</template>
+            </div>
+          </div>
+        </div>
         <div class="policy-setting-row">
           <span><strong>IP 版本</strong><small>修改后自动保存，下次开启网络时生效</small></span>
           <div class="policy-field-control">
